@@ -1,0 +1,21 @@
+[workspace]
+resolver = "2"
+members = ["creates/lib-auth", "creates/lib-core", "creates/lib-entity", "creates/lib-rpc", "creates/lib-utils", "service/web-server"]
+
+[workspace.dependencies]
+lib-auth = { path = "creates/lib-auth" }
+lib-core = { path = "creates/lib-core" }
+lib-entity = { path = "creates/lib-entity" }
+lib-rpc = { path = "creates/lib-rpc" }
+lib-utils = { path = "creates/lib-utils" }
+anyhow = "1.0.86"
+axum = { version = "0.7.5", features = ["http2", "query", "tracing"] }
+serde = { version = "1.0.205", features = ["derive"] }
+serde_yaml = "0.9.34"
+sqlx = { version = "0.8.0", features = ["mysql", "runtime-tokio", "tls-rustls", "chrono"] }
+thiserror = "1.0.63"
+tokio = { version = "1.39.2", features = ["rt", "rt-multi-thread", "macros"] }
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+mongodb = { version = "3.0.1" }
+urlencoding = { version = "2.1.3" }
