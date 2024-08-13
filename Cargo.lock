@@ -237,6 +237,7 @@ dependencies = [
  "ahash",
  "base64 0.13.1",
  "bitvec",
+ "chrono",
  "hex",
  "indexmap",
  "js-sys",
@@ -245,6 +246,7 @@ dependencies = [
  "serde",
  "serde_bytes",
  "serde_json",
+ "serde_with",
  "time",
  "uuid",
 ]
@@ -287,7 +289,9 @@ checksum = "a21f936df1771bf62b77f047b726c4625ff2e8aa607c01ec06e5a05bd8463401"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
+ "js-sys",
  "num-traits",
+ "wasm-bindgen",
  "windows-targets 0.52.6",
 ]
 
@@ -400,20 +404,6 @@ dependencies = [
  "darling_core",
  "quote",
  "syn 1.0.109",
-]
-
-[[package]]
-name = "dashmap"
-version = "6.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "804c8821570c3f8b70230c2ba75ffa5c0f9a4189b9a432b6656c536712acae28"
-dependencies = [
- "cfg-if",
- "crossbeam-utils",
- "hashbrown",
- "lock_api",
- "once_cell",
- "parking_lot_core",
 ]
 
 [[package]]
@@ -985,20 +975,21 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "axum",
- "dashmap",
- "lazy_static",
  "lib-entity",
  "mongodb",
  "serde",
  "serde_yaml",
  "sqlx",
  "tracing",
+ "urlencoding",
 ]
 
 [[package]]
 name = "lib-entity"
 version = "0.1.0"
 dependencies = [
+ "bson",
+ "chrono",
  "lib-utils",
  "mongodb",
  "serde",

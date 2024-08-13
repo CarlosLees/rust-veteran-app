@@ -10,3 +10,5 @@ serde = { workspace = true }
 mongodb = { workspace = true }
 sqlx = { workspace = true }
 lib-utils = { workspace = true }
+bson = { workspace = true }
+chrono = { workspace = true }
