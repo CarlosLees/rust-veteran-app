@@ -1,13 +1,15 @@
-use crate::config::AppState;
 use anyhow::Result;
 use axum::extract::State;
+use axum::middleware::map_request_with_state;
 use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::{serve, Json, Router};
 use lib_core::mongo_config::init_mongo_client;
-use lib_core::{init_mysql_pool, AppConfig};
+use lib_core::{init_mysql_pool, mysql_pool_middleware};
 use lib_entity::mongo::ServerConfig;
 use lib_entity::mysql::LitemallInfoVeteran;
+use lib_entity::AppState;
+use lib_utils::AppConfig;
 use mongodb::bson::doc;
 use tokio::net::TcpListener;
 use tracing::level_filters::LevelFilter;
@@ -17,17 +19,15 @@ use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::Layer as _;
 use urlencoding::encode;
 
-mod config;
-
 #[tokio::main]
 async fn main() -> Result<()> {
     let layer = Layer::new().with_filter(LevelFilter::INFO);
     tracing_subscriber::registry().with(layer).init();
 
     let app_config = AppConfig::try_load()?;
-    let database = init_mongo_client(&app_config.mongo.url, &app_config.mongo.db_name).await;
+    let mongo_database = init_mongo_client(&app_config.mongo.url, &app_config.mongo.db_name).await;
 
-    let app_state = AppState::new(database, app_config);
+    let app_state = AppState::new(mongo_database, app_config);
 
     let addr = format!("0.0.0.0:{}", app_state.app_config.server.port);
     println!("Listening on {}", addr);
@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
 
     let app = Router::new()
         .route("/version", get(get_version_handler))
-        // .layer(axum::middleware::from_fn(pg_pool_middleware))
+        .route_layer(map_request_with_state(app_state.clone(), mysql_pool_middleware))
         .with_state(app_state);
 
     serve(listen, app.into_make_service()).await?;
@@ -44,14 +44,13 @@ async fn main() -> Result<()> {
 }
 
 async fn get_version_handler(State(state): State<AppState>) -> impl IntoResponse {
-    let one: Option<ServerConfig> = state
-        .inner
-        .database
+    let server_config: Option<ServerConfig> = state
+        .mongo_database
         .collection("ServerConfig")
         .find_one(doc! {})
         .await
         .unwrap();
-    if let Some(config) = one {
+    if let Some(config) = server_config {
         // 连接到mysql
         let pool = init_mysql_pool(
             format!(
@@ -67,7 +66,9 @@ async fn get_version_handler(State(state): State<AppState>) -> impl IntoResponse
         .await
         .unwrap();
         let veteran_list: Vec<LitemallInfoVeteran> =
-            sqlx::query_as("select * from litemall_info_veteran")
+            sqlx::query_as(r#"select * from litemall_info_veteran where deleted = ? and age > ?"#)
+                .bind(false)
+                .bind(20)
                 .fetch_all(&pool)
                 .await
                 .unwrap();

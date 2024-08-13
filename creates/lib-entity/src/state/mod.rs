@@ -1,4 +1,4 @@
-use lib_core::AppConfig;
+use lib_utils::AppConfig;
 use mongodb::Database;
 use std::ops::Deref;
 use std::sync::Arc;
@@ -10,7 +10,7 @@ pub struct AppState {
 
 #[derive(Debug)]
 pub struct AppStateInner {
-    pub database: Database,
+    pub mongo_database: Database,
     pub app_config: AppConfig,
 }
 
@@ -23,10 +23,10 @@ impl Deref for AppState {
 }
 
 impl AppState {
-    pub fn new(database: Database, app_config: AppConfig) -> Self {
+    pub fn new(mongo_database: Database, app_config: AppConfig) -> Self {
         Self {
             inner: Arc::new(AppStateInner {
-                database,
+                mongo_database,
                 app_config,
             }),
         }

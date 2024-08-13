@@ -19,3 +19,5 @@ tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 mongodb = { version = "3.0.1" }
 urlencoding = { version = "2.1.3" }
+dashmap = "6.0.1"
+lazy_static = "1.5.0"

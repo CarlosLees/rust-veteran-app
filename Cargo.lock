@@ -403,6 +403,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "dashmap"
+version = "6.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "804c8821570c3f8b70230c2ba75ffa5c0f9a4189b9a432b6656c536712acae28"
+dependencies = [
+ "cfg-if",
+ "crossbeam-utils",
+ "hashbrown",
+ "lock_api",
+ "once_cell",
+ "parking_lot_core",
+]
+
+[[package]]
 name = "data-encoding"
 version = "2.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -970,17 +984,22 @@ name = "lib-core"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "axum",
+ "dashmap",
+ "lazy_static",
  "lib-entity",
  "mongodb",
  "serde",
  "serde_yaml",
  "sqlx",
+ "tracing",
 ]
 
 [[package]]
 name = "lib-entity"
 version = "0.1.0"
 dependencies = [
+ "lib-utils",
  "mongodb",
  "serde",
  "sqlx",
@@ -993,6 +1012,11 @@ version = "0.1.0"
 [[package]]
 name = "lib-utils"
 version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "serde",
+ "serde_yaml",
+]
 
 [[package]]
 name = "libc"
