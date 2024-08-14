@@ -1,15 +1,12 @@
 use anyhow::Result;
-use axum::middleware::{self, map_request_with_state};
+use axum::middleware::map_request_with_state;
 use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::{serve, Json, Router};
-use lib_core::{
-    check_pool_connection, get_mysql_pool, init_mongo_client, mysql_pool_middleware, AppError,
-};
+use lib_core::{get_mysql_pool, init_mongo_client, mysql_pool_middleware};
 use lib_entity::mysql::LitemallInfoVeteran;
 use lib_entity::AppState;
 use lib_utils::AppConfig;
-use sqlx::pool;
 use tokio::net::TcpListener;
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::fmt::Layer;
