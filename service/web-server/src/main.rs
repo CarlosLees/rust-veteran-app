@@ -46,9 +46,8 @@ async fn main() -> Result<()> {
 async fn get_version_handler() -> impl IntoResponse {
     let pool = get_mysql_pool().unwrap();
     let veteran_list: Vec<LitemallInfoVeteran> =
-        sqlx::query_as(r#"select * from litemall_info_veteran where deleted = ? and age > ?"#)
+        sqlx::query_as(r#"select * from litemall_info_veteran where deleted = ?"#)
             .bind(false)
-            .bind(20)
             .fetch_all(&pool)
             .await
             .unwrap();
