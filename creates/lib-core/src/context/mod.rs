@@ -15,6 +15,10 @@ pub fn get_mysql_pool() -> Option<MySqlPool> {
     THREAD_MYSQL_POOL.with(|p| p.borrow().clone())
 }
 
+pub fn clear_mysql_pool() {
+    THREAD_MYSQL_POOL.with(|p| *p.borrow_mut() = None)
+}
+
 type PoolMap = DashMap<String, MySqlPool>;
 
 lazy_static::lazy_static! {
