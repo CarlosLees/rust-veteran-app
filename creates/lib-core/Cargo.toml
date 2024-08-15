@@ -12,9 +12,11 @@ serde_yaml = { workspace = true }
 anyhow = { workspace = true }
 sqlx = { workspace = true }
 lib-entity = { workspace = true }
+lib-utils = { workspace = true }
 axum = { workspace = true }
 tracing = { workspace = true }
 urlencoding = { workspace = true }
 dashmap = { workspace = true }
 lazy_static = { workspace = true }
 thiserror = { workspace = true }
+serde_json = { workspace = true }

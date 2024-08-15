@@ -2,11 +2,11 @@ use anyhow::Result;
 use axum::middleware::map_request_with_state;
 use axum::response::IntoResponse;
 use axum::routing::get;
-use axum::{serve, Json, Router};
-use lib_core::{get_mysql_pool, init_mongo_client, mysql_pool_middleware};
+use axum::{serve, Router};
+use lib_core::{get_mysql_pool_or_error, init_mongo_client, mysql_pool_middleware, AppError};
 use lib_entity::mysql::LitemallInfoVeteran;
 use lib_entity::AppState;
-use lib_utils::AppConfig;
+use lib_utils::{AppConfig, HttpResult};
 use tokio::net::TcpListener;
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::fmt::Layer;
@@ -42,13 +42,15 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn get_version_handler() -> impl IntoResponse {
-    let pool = get_mysql_pool().unwrap();
+async fn get_version_handler() -> Result<impl IntoResponse, AppError> {
+    let pool = get_mysql_pool_or_error()?;
+
     let veteran_list: Vec<LitemallInfoVeteran> =
         sqlx::query_as(r#"select * from litemall_info_veteran where deleted = ?"#)
             .bind(false)
             .fetch_all(&pool)
             .await
-            .unwrap();
-    return Json(veteran_list);
+            .map_err(|_| AppError::ServiceError(String::from("Database query failed")))?;
+
+    Ok(HttpResult::ok(veteran_list))
 }

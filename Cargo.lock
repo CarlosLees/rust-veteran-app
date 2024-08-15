@@ -992,8 +992,10 @@ dependencies = [
  "dashmap",
  "lazy_static",
  "lib-entity",
+ "lib-utils",
  "mongodb",
  "serde",
+ "serde_json",
  "serde_yaml",
  "sqlx",
  "thiserror",
@@ -1022,7 +1024,9 @@ name = "lib-utils"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "axum",
  "serde",
+ "serde_json",
  "serde_yaml",
 ]
 
