@@ -1,12 +1,13 @@
+mod router;
+
 use anyhow::Result;
-use axum::middleware::map_request_with_state;
 use axum::response::IntoResponse;
-use axum::routing::get;
-use axum::{serve, Router};
-use lib_core::{get_mysql_pool_or_error, init_mongo_client, mysql_pool_middleware, AppError};
+use axum::serve;
+use lib_core::{get_mysql_pool_or_error, init_mongo_client, AppError};
 use lib_entity::mysql::LitemallInfoVeteran;
 use lib_entity::AppState;
 use lib_utils::{AppConfig, HttpResult};
+use router::get_router;
 use tokio::net::TcpListener;
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::fmt::Layer;
@@ -29,14 +30,7 @@ async fn main() -> Result<()> {
 
     let listen = TcpListener::bind(&addr).await?;
 
-    let app = Router::new()
-        .route("/version", get(get_version_handler))
-        .route_layer(map_request_with_state(
-            app_state.clone(),
-            mysql_pool_middleware,
-        ))
-        // .layer(middleware::from_fn(check_pool_connection))
-        .with_state(app_state);
+    let app = get_router(app_state).await;
 
     serve(listen, app.into_make_service()).await?;
     Ok(())
