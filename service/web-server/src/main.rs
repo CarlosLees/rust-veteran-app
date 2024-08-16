@@ -1,3 +1,4 @@
+mod handlers;
 mod router;
 
 use anyhow::Result;

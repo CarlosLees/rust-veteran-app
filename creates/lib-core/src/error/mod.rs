@@ -4,6 +4,7 @@ use axum::{
 };
 use lib_utils::HttpResult;
 use thiserror::Error;
+use tracing::error;
 
 #[derive(Error, Debug)]
 pub enum AppError {
@@ -15,6 +16,8 @@ pub enum AppError {
     InternalServerError,
     #[error("{0}")]
     ServiceError(String),
+    #[error("sql error")]
+    SqlXError(#[from] sqlx::Error),
 }
 
 impl IntoResponse for AppError {
@@ -34,6 +37,13 @@ impl IntoResponse for AppError {
             ),
             AppError::ServiceError(error_str) => {
                 (StatusCode::OK, HttpResult::<String>::error(error_str))
+            }
+            AppError::SqlXError(sql_error) => {
+                error!("sql error:{:?}", sql_error);
+                (
+                    StatusCode::OK,
+                    HttpResult::<String>::error("查询失败".into()),
+                )
             }
         };
         let mut response = (status, serde_json::to_string(&body).unwrap()).into_response();
