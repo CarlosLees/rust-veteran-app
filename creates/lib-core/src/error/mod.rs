@@ -18,6 +18,8 @@ pub enum AppError {
     ServiceError(String),
     #[error("sql error")]
     SqlXError(#[from] sqlx::Error),
+    #[error("mongo error")]
+    MongoError(#[from] mongodb::error::Error),
 }
 
 impl IntoResponse for AppError {
@@ -40,6 +42,13 @@ impl IntoResponse for AppError {
             }
             AppError::SqlXError(sql_error) => {
                 error!("sql error:{:?}", sql_error);
+                (
+                    StatusCode::OK,
+                    HttpResult::<String>::error("查询失败".into()),
+                )
+            }
+            AppError::MongoError(mongo_error) => {
+                error!("mongo error:{:?}", mongo_error);
                 (
                     StatusCode::OK,
                     HttpResult::<String>::error("查询失败".into()),
