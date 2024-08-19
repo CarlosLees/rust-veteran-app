@@ -1,4 +1,6 @@
-use axum::{extract::Query, response::IntoResponse};
+use anyhow::Result;
+use axum::{extract::Query, response::IntoResponse, Json};
+use axum_extra::extract::WithRejection;
 use chrono::{DateTime, Utc};
 use lib_core::{get_mysql_pool_or_error, AppError};
 use lib_utils::{serialize_datetime, serialize_datetime_with_option, HttpResult};
@@ -6,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::{prelude::FromRow, QueryBuilder};
 
 #[derive(Debug, Deserialize, Serialize)]
-pub(crate) struct CarRecordParam {
+pub(crate) struct CarRecordListParam {
     pub limit: i32,
     pub license: Option<String>,
     #[serde(rename = "lastId")]
@@ -38,7 +40,7 @@ pub(crate) struct CarRecordListResponse {
 }
 
 pub async fn car_record_list_handler(
-    Query(param): Query<CarRecordParam>,
+    Query(param): Query<CarRecordListParam>,
 ) -> Result<impl IntoResponse, AppError> {
     let pool = get_mysql_pool_or_error()?;
 
@@ -46,11 +48,11 @@ pub async fn car_record_list_handler(
         r#"select * from litemall_car_record WHERE be_batch = false And deleted = false"#,
     );
 
-    if let Some(license) = param.license.clone() {
+    if let Some(license) = param.license {
         query_builder.push(" AND license = ").push_bind(license);
     }
 
-    if let Some(last_id) = param.last_id.clone() {
+    if let Some(last_id) = param.last_id {
         query_builder.push(" AND id > ").push_bind(last_id);
     }
 
@@ -61,5 +63,30 @@ pub async fn car_record_list_handler(
     let result: Vec<CarRecordListResponse> =
         query_builder.build_query_as().fetch_all(&pool).await?;
 
+    Ok(HttpResult::ok(result))
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct UpdateCardRecordParam {
+    pub id: i32,
+    pub start_time: String,
+    pub stopwatch_start: String,
+    pub stopwatch_end: String,
+    pub return_time: String,
+}
+
+pub async fn update_car_record(
+    WithRejection(Json(param), _): WithRejection<Json<UpdateCardRecordParam>, AppError>,
+) -> Result<impl IntoResponse, AppError> {
+    let pool = get_mysql_pool_or_error()?;
+
+    let result: Option<CarRecordListResponse> = sqlx::query_as("update litemall_car_record set start_time = ?, stopwatch_start = ?,stopwatch_end = ?,return_time = ? where id = ?")
+            .bind(param.start_time)
+            .bind(param.stopwatch_start)
+            .bind(param.stopwatch_end)
+            .bind(param.return_time)
+            .bind(param.id)
+            .fetch_optional(&pool).await?;
     Ok(HttpResult::ok(result))
 }

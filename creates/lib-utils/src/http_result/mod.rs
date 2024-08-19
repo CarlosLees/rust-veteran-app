@@ -20,6 +20,14 @@ impl<T> HttpResult<T> {
         }
     }
 
+    pub fn ok_with_message() -> Self {
+        Self {
+            code: 200,
+            message: String::from("成功"),
+            data: None,
+        }
+    }
+
     pub fn error(message: String) -> Self {
         Self {
             code: 555,

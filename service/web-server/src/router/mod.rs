@@ -1,11 +1,16 @@
-use axum::{http::Method, middleware::map_request_with_state, routing::get, Router};
+use axum::{
+    http::Method,
+    middleware::map_request_with_state,
+    routing::{get, post},
+    Router,
+};
 use lib_core::mysql_pool_middleware;
 use lib_entity::AppState;
 use tower_http::cors::{Any, CorsLayer};
 
 use crate::{
     get_version_handler,
-    handlers::{car_record_list_handler, company_list},
+    handlers::{car_record_list_handler, company_list, update_car_record},
 };
 
 pub async fn get_router(app_state: AppState) -> Router {
@@ -17,6 +22,7 @@ pub async fn get_router(app_state: AppState) -> Router {
     let app = Router::new()
         .route("/version", get(get_version_handler))
         .route("/company_list", get(company_list))
+        .route("/update_car_record", post(update_car_record))
         .route("/car", get(car_record_list_handler))
         .route_layer(map_request_with_state(
             app_state.clone(),

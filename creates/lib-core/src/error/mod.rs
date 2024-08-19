@@ -1,4 +1,5 @@
 use axum::{
+    extract::rejection::JsonRejection,
     http::{header, StatusCode},
     response::IntoResponse,
 };
@@ -20,6 +21,12 @@ pub enum AppError {
     SqlXError(#[from] sqlx::Error),
     #[error("mongo error")]
     MongoError(#[from] mongodb::error::Error),
+    #[error("parse error")]
+    ParseError(#[from] chrono::ParseError),
+    #[error("axum error")]
+    AxumError(#[from] axum::Error),
+    #[error("json deserialize error")]
+    JsonDeserializeError(#[from] JsonRejection),
 }
 
 impl IntoResponse for AppError {
@@ -52,6 +59,27 @@ impl IntoResponse for AppError {
                 (
                     StatusCode::OK,
                     HttpResult::<String>::error("查询失败".into()),
+                )
+            }
+            AppError::ParseError(parse_error) => {
+                error!("时间转换失败:{:?}", parse_error);
+                (
+                    StatusCode::OK,
+                    HttpResult::<String>::error("参数错误".into()),
+                )
+            }
+            AppError::AxumError(axum_error) => {
+                error!("axum error:{:?}", axum_error);
+                (
+                    StatusCode::OK,
+                    HttpResult::<String>::error("参数错误".into()),
+                )
+            }
+            AppError::JsonDeserializeError(json_error) => {
+                error!("json error:{:?}", json_error);
+                (
+                    StatusCode::OK,
+                    HttpResult::<String>::error("参数错误".into()),
                 )
             }
         };

@@ -24,3 +24,4 @@ tower-http = { workspace = true }
 futures = { workspace = true }
 futures-util = { workspace = true }
 chrono = { workspace = true }
+axum-extra = { workspace = true }
