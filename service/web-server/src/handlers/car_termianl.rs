@@ -1,7 +1,7 @@
 use axum::{extract::Query, response::IntoResponse};
 use chrono::{DateTime, Utc};
 use lib_core::{get_mysql_pool_or_error, AppError};
-use lib_utils::HttpResult;
+use lib_utils::{serialize_datetime, serialize_datetime_with_option, HttpResult};
 use serde::{Deserialize, Serialize};
 use sqlx::{prelude::FromRow, QueryBuilder};
 
@@ -18,20 +18,23 @@ pub(crate) struct CarRecordParam {
 pub(crate) struct CarRecordListResponse {
     pub id: Option<i32>,
     pub license: String,
-    pub veteran_id: u32,
+    pub veteran_id: i32,
     pub veteran_name: String,
     pub addr: String,
-    pub start_time: DateTime<Utc>,
+    #[serde(serialize_with = "serialize_datetime_with_option")]
+    pub start_time: Option<DateTime<Utc>>,
+    #[serde(serialize_with = "serialize_datetime")]
     pub add_time: DateTime<Utc>,
-    pub car_unit: String,
-    pub car_use: String,
-    pub start_addr: String,
-    pub driver_name: String,
-    pub filter: String,
-    pub stop_watch_start: String,
-    pub stop_watch_end: String,
-    pub return_time: String,
-    pub is_return: u32,
+    pub car_unit: Option<String>,
+    pub car_use: Option<String>,
+    pub start_addr: Option<String>,
+    pub driver_name: Option<String>,
+    pub filler: Option<String>,
+    pub stopwatch_start: Option<String>,
+    pub stopwatch_end: Option<String>,
+    #[serde(serialize_with = "serialize_datetime_with_option")]
+    pub return_time: Option<DateTime<Utc>>,
+    pub is_return: i32,
 }
 
 pub async fn car_record_list_handler(
@@ -39,8 +42,9 @@ pub async fn car_record_list_handler(
 ) -> Result<impl IntoResponse, AppError> {
     let pool = get_mysql_pool_or_error()?;
 
-    let mut query_builder =
-        QueryBuilder::new(r#"select * from litemall_car_record WHERE be_batch = false"#);
+    let mut query_builder = QueryBuilder::new(
+        r#"select * from litemall_car_record WHERE be_batch = false And deleted = false"#,
+    );
 
     if let Some(license) = param.license.clone() {
         query_builder.push(" AND license = ").push_bind(license);

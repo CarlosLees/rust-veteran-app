@@ -1,6 +1,6 @@
 server:
   port: 6699
 mongo:
-  # url: mongodb://root:SD0535!%40%23408@192.168.0.25:27017
-  url: mongodb://root:SD0535!%40%23408@dds-m5e22f04202a78041160-pub.mongodb.rds.aliyuncs.com:3717
+  url: mongodb://root:SD0535!%40%23408@192.168.0.25:27017
+  # url: mongodb://root:SD0535!%40%23408@dds-m5e22f04202a78041160-pub.mongodb.rds.aliyuncs.com:3717
   db_name: tosaas
