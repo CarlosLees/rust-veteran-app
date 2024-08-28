@@ -79,6 +79,7 @@ pub(crate) struct UpdateCardRecordParam {
 pub async fn update_car_record(
     WithRejection(Json(param), _): WithRejection<Json<UpdateCardRecordParam>, AppError>,
 ) -> Result<impl IntoResponse, AppError> {
+    // WithRejection 在解析json参数时，如果解析失败，可以返回自定义错误，而非axum返回的字符串
     let pool = get_mysql_pool_or_error()?;
 
     let result: Option<CarRecordListResponse> = sqlx::query_as("update litemall_car_record set start_time = ?, stopwatch_start = ?,stopwatch_end = ?,return_time = ? where id = ?")
